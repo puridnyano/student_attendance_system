@@ -30,6 +30,15 @@ class Student(CustomUser):
     class Meta:
         proxy = True
 
+class StudentProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    student_id = models.IntegerField(null=True, blank=True)
+
+@receiver(post_save, sender=Student)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created and instance.role == "STUDENT":
+        StudentProfile.objects.create(user=instance)
+
 class TeacherManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
         results = super().get_queryset(*args, **kwargs)
@@ -44,3 +53,10 @@ class Teacher(CustomUser):
 
 class TeacherProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    teacher_id = models.IntegerField(null=True, blank=True)
+
+@receiver(post_save, sender=Teacher)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created and instance.role == "TEACHER":
+        TeacherProfile.objects.create(user=instance)
+
